@@ -6,6 +6,6 @@ import (
 )
 
 func main(){
-	fmt.Println(test.PrintName)
+	test.PrintName()
 	fmt.Println(test.MyName)
 }
