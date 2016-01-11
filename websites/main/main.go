@@ -8,7 +8,7 @@ import (
 "path/filepath"
 )
 
-var absPath, _ = filepath.Abs("../jschalkwijk/GolangTraining/websites/main/")
+var html, _ = filepath.Abs("../jschalkwijk/GolangTraining/websites/html")
 
 func main() {
 	http.HandleFunc("/", handler)
@@ -17,7 +17,7 @@ func main() {
 
 func renderPage() (y string) {
 	// read whole the file
-	test, err := ioutil.ReadFile(absPath+"/test.html")
+	test, err := ioutil.ReadFile(html+"/test.html")
 	if err != nil {
 		panic(err)
 	}
