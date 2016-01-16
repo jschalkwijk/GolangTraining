@@ -20,6 +20,7 @@ func main() {
 	http.HandleFunc("/edit/", editHandler)
 	http.HandleFunc("/save/", saveHandler)
 	http.ListenAndServe(":8080", nil)
+
 }
 
 // Is this an object??
@@ -32,6 +33,7 @@ func main() {
 type Page struct {
 	Title string
 	Body  []byte
+	Name string
 }
 
 type Person struct {
@@ -57,14 +59,14 @@ func (p *Page) save() error {
 	assigned values.
 */
 
-func loadPage(title string) (*Page, error) {
+func loadPage(title string) (*Page, error,*Person, error) {
 	filename := title + ".txt"
 	body, err := ioutil.ReadFile(view + "/" + filename)
 	if err != nil {
-		return nil, err
+		return nil, err,nil,err
 	}
-
-	return &Page{Title: title, Body: body}, nil
+	jorn := Person{Name: "jorn",Age:24}
+	return &Page{Title: title, Body: body, Name: "jorn"}, nil, &jorn, nil
 }
 
 /*
@@ -75,15 +77,16 @@ func loadPage(title string) (*Page, error) {
 
 */
 func viewHandler(w http.ResponseWriter, r *http.Request) {
+
 	title := r.URL.Path[len("/view/"):]
 	// returns the page struct with the assigned valus from the url and file contents
-	p, err := loadPage(title)
-	if err != nil {
+	p, err,h,error := loadPage(title)
+
+	if err != nil || error != nil {
 		http.Redirect(w, r, "/edit/" + title, http.StatusFound)
 		return
 	}
-
-	renderTemplate(w, "view", p)
+	renderTemplate(w, "view", p,h)
 
 }
 
@@ -93,9 +96,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
   The .Title and .Body dotted identifiers inside the template refer to p.Title and p.Body.
 */
 
-func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
-	Jorn := Person{"jorn",27}
-	println(Jorn.Name)
+func renderTemplate(w http.ResponseWriter, tmpl string, p *Page, h *Person) {
 	t, err := template.ParseFiles(view + "/" + tmpl + ".html")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -126,11 +127,11 @@ func saveHandler(w http.ResponseWriter, r *http.Request) {
 
 func editHandler(w http.ResponseWriter, r *http.Request){
 	title := r.URL.Path[len("/edit/"):]
-	p, err := loadPage(title)
-	if err != nil {
+	p, err,h,error := loadPage(title)
+	if err != nil || error != nil {
 		p = &Page{Title: title}
 	}
-	renderTemplate(w, "edit", p)
+	renderTemplate(w, "edit", p,h)
 }
 
 
