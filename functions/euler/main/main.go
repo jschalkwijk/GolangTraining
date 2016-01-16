@@ -15,6 +15,7 @@ Find the largest palindrome made from the product of two 3-digit numbers.
 */
 func main()  {
 	palindrome()
+	exampleReverse()
 }
 
 func palindrome(){
@@ -56,8 +57,6 @@ func palindrome(){
 	fmt.Println("This sum: ", sum, " creates the largest palindrome made from the product of two 3-digit numbers.")
 	fmt.Println(biggest)
 
-	reverse("hello")
-
 }
 
 // I can't take credit for this reverse function but I will try to explain the functionality.
@@ -66,15 +65,27 @@ func palindrome(){
 /* Reverse takes a value of type string which is assigned to a variable s, it returns a string*/
 
 func reverse(s string) string {
-	// example: if we input the string "hello"
-	// we convert the string to a slice of runes. [106 111 114 110] (UTF-8)
+	// example: if we input the string "abcdefg"
+	// we convert the string to a slice of runes. [97 98 99 100 101 102 103] (UTF-8 encoding)
 	chars := []rune(s)
 	//fmt.Println(chars);
-	//fmt.Println(len(chars))
+
+	// I think i and j, resemble the positions in the slice, most left, most right.
+	// They switch the values, and then working towards the middle
+	// in this example 0 - 6, 1 -5 , 2-4.
+	// after the position switches the runes are converted back to a string.
+	// I do not understand this for loop with the many conditions.
 	for i, j := 0, len(chars)-1; i < j; i, j = i+1, j-1 {
+		//fmt.Println(i,j)
 		//fmt.Println(chars[i],chars[j]);
 		chars[i], chars[j] = chars[j], chars[i]
+		//fmt.Println(chars[i],chars[j]);
 	}
+	//fmt.Println(chars)
 	return string(chars)
+}
+
+func exampleReverse() {
+	fmt.Printf("%v\n", reverse("abcdefg"))
 }
 
