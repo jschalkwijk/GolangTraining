@@ -65,8 +65,9 @@ func loadPage(title string) (*Page, error,*Person, error) {
 	if err != nil {
 		return nil, err,nil,err
 	}
+
 	jorn := Person{Name: "jorn",Age:24}
-	return &Page{Title: title, Body: body, Name: "jorn"}, nil, &jorn, nil
+	return &Page{Title: title, Body: body, Name: "jorN"}, nil, &jorn, nil
 }
 
 /*
