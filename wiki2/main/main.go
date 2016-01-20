@@ -8,7 +8,9 @@ import (
 	"html/template"
 	"io/ioutil"
 	"net/http"
+    "net/url"
 	"path/filepath"
+	"fmt"
 )
 
 
@@ -80,6 +82,12 @@ func loadPage(title string) (*Page, error,*Person, error) {
 func viewHandler(w http.ResponseWriter, r *http.Request) {
 
 	title := r.URL.Path[len("/view/"):]
+	u, err := url.Parse(title)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(u.Scheme)
+
 	// returns the page struct with the assigned valus from the url and file contents
 	p, err,h,error := loadPage(title)
 
