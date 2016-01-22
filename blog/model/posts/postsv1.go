@@ -1,4 +1,6 @@
 package posts
+/*
+
 
 import (
 	_"github.com/go-sql-driver/mysql"
@@ -13,20 +15,19 @@ import (
 
 // here we define the absolute path to the view folder it takes the go root until the github folder.
 var view, _ = filepath.Abs("../jschalkwijk/GolangTraining/blog/view")
-var templates, _ = filepath.Abs("../jschalkwijk/GolangTraining/blog/templates")
 
 // Post struct to create posts which will be added to the collection struct
 type Post struct {
-	Post_ID int
-	Title string
-	Description string
-	Content string
-	Keywords string
-	Approved int
-	Author string
-	Date string
-	Category_ID int
-	Trashed int
+Post_ID int
+Title string
+Description string
+Content string
+Keywords string
+Approved int
+Author string
+Date string
+Category_ID int
+Trashed int
 }
 
 var post_id int
@@ -42,26 +43,25 @@ var trashed int
 
 // Stores a single post, or multiple posts which we can then iterate over in the template
 type Collection struct {
-	Posts []Post
+Posts []Post
 }
 
+*/
 /*
   The function template.ParseFiles will read the contents of "".html and return a *template.Template.
   The method t.Execute executes the template, writing the generated HTML to the http.ResponseWriter.
   The .Title and .Body dotted identifiers inside the template refer to p.Title and p.Body.
-*/
+*//*
+
 
 
 func renderTemplate(w http.ResponseWriter,name string, p []Post) {
-	t, err := template.ParseFiles(templates+"/"+"header.html",view + "/" + name + ".html",templates+"/"+"footer.html")
+	t, err := template.ParseFiles(view + "/" + name + ".html")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	t.ExecuteTemplate(w,"header",nil)
-	t.ExecuteTemplate(w,name,p)
-	t.ExecuteTemplate(w,"footer",nil)
-	err = t.Execute(w, nil)
+	err = t.Execute(w, p)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
@@ -118,7 +118,7 @@ func getPosts() []Post {
 	defer db.Close()
 	defer fmt.Println("Connection with database Closed")
 
-	rows, err := db.Query("SELECT * FROM posts ORDER BY post_id DESC")
+	rows, err := db.Query("SELECT * FROM posts ORDER BY postid DESC")
 	checkErr(err)
 
 	collection := new(Collection)
@@ -222,4 +222,4 @@ func checkErr(err error) {
 	if err != nil {
 		panic(err)
 	}
-}
+}*/

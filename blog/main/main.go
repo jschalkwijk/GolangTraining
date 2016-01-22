@@ -8,7 +8,6 @@ import (
 func main() {
 	http.HandleFunc("/posts/", posts.PostsHandler)
 	http.ListenAndServe(":8080", nil)
-
 }
 
 

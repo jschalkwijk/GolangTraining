@@ -1,17 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{{define "posts"}}
+    {{template "header"}}
+        <a href="/posts/new">Create Post</a>
 
-{{ range $key, $value := .}}
-    <h1><a href="/posts/{{.Post_ID}}/{{.Title}}">{{.Title}}</a></h1>
-    <p><a href="/edit/{{.Title}}">edit</a></p>
+        {{ range $key, $value := .}}
+            <h1><a href="/posts/{{.Post_ID}}/{{.Title}}">{{.Title}}</a></h1>
+            <p><a href="/posts/edit/{{.Post_ID}}/{{.Title}}">edit</a></p>
 
-    <div>{{printf "%s" .Content}}</div>
-{{ end }}
+            <div>{{printf "%s" .Content}}</div>
+        {{ end }}
 
-</body>
-</html>
+    {{template "footer"}}
+{{end}}

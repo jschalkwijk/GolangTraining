@@ -69,7 +69,7 @@ func loadPage(title string) (*Page, error,*Person, error) {
 	}
 
 	jorn := Person{Name: "jorn",Age:24}
-	return &Page{Title: title, Body: body, Name: "jorN"}, nil, &jorn, nil
+	return &Page{Title: title, Body: body, Name: "Jorn"}, nil, &jorn, nil
 }
 
 /*
@@ -100,7 +100,7 @@ func viewHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 /*
-  The function template.ParseFiles will read the contents of edit.html and return a *template.Template.
+  The function template.ParseFiles will read the contents of edit-post.html and return a *template.Template.
   The method t.Execute executes the template, writing the generated HTML to the http.ResponseWriter.
   The .Title and .Body dotted identifiers inside the template refer to p.Title and p.Body.
 */
@@ -117,7 +117,7 @@ func renderTemplate(w http.ResponseWriter, tmpl string, p *Page, h *Person) {
 	}
 }
 /*
-  The function template.ParseFiles will read the contents of edit.html and return a *template.Template.
+  The function template.ParseFiles will read the contents of edit-post.html and return a *template.Template.
   The method t.Execute executes the template, writing the generated HTML to the http.ResponseWriter.
   The .Title and .Body dotted identifiers refer to p.Title and p.Body.
 */
