@@ -1,0 +1,12 @@
+{{define "edit-post"}}
+    {{template "header"}}
+        {{ range $key, $value := .}}
+        <h1>Editing <a href="/posts/{{.Post_ID}}/{{.Title}}">{{.Title}}</a></h1>
+
+        <form action="/posts/save/{{.Post_ID}}/{{.Title}}" method="POST">
+            <div><textarea name="content" rows="20" cols="80">{{printf "%s" .Content}}</textarea></div>
+            <div><input type="submit" value="Save"></div>
+        </form>
+        {{end}}
+    {{template "footer"}}
+{{end}}

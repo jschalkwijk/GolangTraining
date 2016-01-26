@@ -1,48 +1,50 @@
-package posts
+package categories
 
 import (
-	_"github.com/go-sql-driver/mysql"
-	"database/sql"
-	"fmt"
-	"html/template"
-	"net/http"
-	"path/filepath"
-	"strings"
-	"strconv"
+_"github.com/go-sql-driver/mysql"
+"database/sql"
+"fmt"
+"html/template"
+"net/http"
+"path/filepath"
+"strings"
+"strconv"
 )
 
 // here we define the absolute path to the view folder it takes the go root until the github folder.
 var view, _ = filepath.Abs("../jschalkwijk/GolangTraining/blog/view")
 var templates, _ = filepath.Abs("../jschalkwijk/GolangTraining/blog/templates")
 
-// Post struct to create posts which will be added to the collection struct
-type Post struct {
-	Post_ID int
+// categorie struct to create categories which will be added to the collection struct
+type Category struct {
+	Category_ID int
 	Title string
 	Description string
 	Content string
 	Keywords string
 	Approved int
 	Author string
+	Cat_Type string
 	Date string
-	Category_ID int
+	Parent_ID int
 	Trashed int
 }
 
-var post_id int
+var category_id int
 var title string
 var description string
 var content string
 var keywords string
 var approved int
 var author string
+var cat_type string
 var date string
-var category_id int
+var parent_id int
 var trashed int
 
-// Stores a single post, or multiple posts which we can then iterate over in the template
+// Stores a single categorie, or multiple categories which we can then iterate over in the template
 type Collection struct {
-	Posts []Post
+	Categories []Category
 }
 
 /*
@@ -52,7 +54,7 @@ type Collection struct {
 */
 
 
-func renderTemplate(w http.ResponseWriter,name string, p []Post) {
+func renderTemplate(w http.ResponseWriter,name string, p []Category) {
 	t, err := template.ParseFiles(templates+"/"+"header.html",view + "/" + name + ".html",templates+"/"+"footer.html")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -68,7 +70,7 @@ func renderTemplate(w http.ResponseWriter,name string, p []Post) {
 }
 
 func splitURL(r *http.Request, prefix string) []string {
-	//The URL that the user queried, and then slice of the /post/ prefix.
+	//The URL that the user queried, and then slice of the /categorie/ prefix.
 	path := r.URL.Path[len("/"+ prefix +"/"):]
 	path = strings.TrimSpace(path)
 	//Cut off the leading and trailing forward slashes, if they exist.
@@ -86,88 +88,88 @@ func splitURL(r *http.Request, prefix string) []string {
 	return params
 }
 
-func PostsHandler(w http.ResponseWriter, r *http.Request) {
-	params := splitURL(r,"posts")
+func CategoriesHandler(w http.ResponseWriter, r *http.Request) {
+	params := splitURL(r,"categories")
 	if(len(params) == 2){
-		p := getSinglePost(params[0],params[1])
-		renderTemplate(w,"posts", p)
+		p := getSingleCategory(params[0],params[1])
+		renderTemplate(w,"categories", p)
 	} else if(len(params) == 3 && params[0] == "edit"){
-		p := getSinglePost(params[1],params[2])
-		renderTemplate(w,"edit-post", p)
+		p := getSingleCategory(params[1],params[2])
+		renderTemplate(w,"edit-category", p)
 	} else if(len(params) == 3 && params[0] == "save"){
-		editPost(w,r,params[1],params[2])
+		editCategory(w,r,params[1],params[2])
 	} else if(len(params) == 1 && params[0] == "new"){
 		collection := new(Collection)
-		p := collection.Posts
-		renderTemplate(w,"new-post", p)
-	} else if(len(params) == 1 && params[0] == "add-post"){
-		newPost(w, r)
+		p := collection.Categories
+		renderTemplate(w,"new-category", p)
+	} else if(len(params) == 1 && params[0] == "add-category"){
+		newCategory(w, r)
 	} else {
-		// returns the page struct with the assigned values from the url and file contents
-		p := getPosts()
-		renderTemplate(w,"posts", p)
-	}
+	// returns the page struct with the assigned values from the url and file contents
+	p := getCategories()
+	renderTemplate(w,"categories", p)
+}
 
 }
 
-// Get all Posts
-func getPosts() []Post {
+// Get all categories
+func getCategories() []Category {
 	db, err := sql.Open("mysql", "root:root@tcp(localhost:8889)/nerdcms_db?charset=utf8")
 	checkErr(err)
 	fmt.Println("Connection with database Established")
 	defer db.Close()
 	defer fmt.Println("Connection with database Closed")
 
-	rows, err := db.Query("SELECT * FROM posts ORDER BY post_id DESC")
+	rows, err := db.Query("SELECT * FROM categories ORDER BY categorie_id DESC")
 	checkErr(err)
 
 	collection := new(Collection)
 	for rows.Next() {
-		err = rows.Scan(&post_id, &title, &description, &content,&keywords,&approved,
-			&author,&date,&category_id,&trashed)
+		err = rows.Scan(&category_id, &title, &description, &content,&keywords,&approved,
+		&author,&cat_type,&date,&parent_id,&trashed)
 		checkErr(err)
 
-		post := Post{post_id,title,description,content,keywords,approved,author,date,category_id,trashed}
+		category := Category{category_id,title,description,content,keywords,approved,author,cat_type,date,parent_id,trashed}
 
-		collection.Posts = append(collection.Posts , post)
+		collection.Categories = append(collection.Categories , category)
 	}
 
-	return collection.Posts
+	return collection.Categories
 }
 
-//Get a single Post
-func getSinglePost(id string,post_title string) []Post {
+//Get a single categorie
+func getSingleCategory(id string,category_title string) []Category {
 	db, err := sql.Open("mysql", "root:root@tcp(localhost:8889)/nerdcms_db?charset=utf8")
 	checkErr(err)
 	fmt.Println("Connection established")
 	defer db.Close()
 	defer fmt.Println("Connection Closed")
-	fmt.Println("SELECT * FROM posts WHERE post_id="+id+" AND title='"+post_title+"' LIMIT  1")
-	rows := db.QueryRow("SELECT * FROM posts WHERE post_id=? AND title=? LIMIT 1", id,post_title)
+	fmt.Println("SELECT * FROM categories WHERE categorie_id="+id+" AND title='"+category_title+"' LIMIT  1")
+	rows := db.QueryRow("SELECT * FROM categories WHERE categorie_id=? AND title=? LIMIT 1", id,category_title)
 
 	collection := new(Collection)
 
-	err = rows.Scan(&post_id, &title, &description, &content,&keywords,&approved,
-		&author,&date,&category_id,&trashed)
+	err = rows.Scan(&category_id, &title, &description, &content,&keywords,&approved,
+	&author,&date,&parent_id,&trashed)
 	checkErr(err)
 
-	post := Post{post_id,title,description,content,keywords,approved,author,date,category_id,trashed}
+	category := Category{category_id,title,description,content,keywords,approved,author,cat_type,date,parent_id,trashed}
 
-	collection.Posts = append(collection.Posts , post)
+	collection.Categories = append(collection.Categories , category)
 
-	//fmt.Println(collection.Posts)
-	return collection.Posts
+	//fmt.Println(collection.categories)
+	return collection.Categories
 }
 
-// Post Methods
-func (p *Post) savePost() error {
+// categorie Methods
+func (p *Category) saveCategory() error {
 	db, err := sql.Open("mysql", "root:root@tcp(localhost:8889)/nerdcms_db?charset=utf8")
 	defer db.Close()
 	checkErr(err)
-	stmt, err := db.Prepare("UPDATE posts SET title=?, description=?, content=? WHERE post_id=?")
+	stmt, err := db.Prepare("UPDATE categories SET title=?, description=?, content=? WHERE categorie_id=?")
 	fmt.Println(stmt)
 	checkErr(err)
-	res, err := stmt.Exec(p.Title,p.Description,p.Content,p.Post_ID)
+	res, err := stmt.Exec(p.Title,p.Description,p.Content,p.Category_ID)
 	affect, err := res.RowsAffected()
 	checkErr(err)
 
@@ -176,52 +178,51 @@ func (p *Post) savePost() error {
 	return err
 }
 
-func (p *Post) addPost() error {
+func (p *Category) addCategory() error {
 	db, err := sql.Open("mysql", "root:root@tcp(localhost:8889)/nerdcms_db?charset=utf8")
 	defer db.Close()
-	stmt, err := db.Prepare("INSERT INTO posts (title,description,content) VALUES(?,?,?) ")
+	stmt, err := db.Prepare("INSERT INTO categories (title,description) VALUES(?,?) ")
 	fmt.Println(stmt)
 	checkErr(err)
-	res, err := stmt.Exec(p.Title,p.Description,p.Content)
+	res, err := stmt.Exec(p.Title,p.Description)
 	affect, err := res.RowsAffected()
 	fmt.Println(affect)
 	fmt.Println(res)
 	checkErr(err)
 	return err
 }
-// End Post methods
+// End category methods
 
 
-func editPost(w http.ResponseWriter, r *http.Request,id string,title string) {
+func editCategory(w http.ResponseWriter, r *http.Request,id string,title string) {
 	title = r.FormValue("title")
 	description := r.FormValue("description")
 	//category_id := r.FormValue("category_id")
 	content := r.FormValue("content")
 	new_id,error := strconv.Atoi(id)
 	checkErr(error)
-	p := &Post{Post_ID: new_id, Title: title,Description: description, Content: content}
+	p := &Category{Category_ID: new_id, Title: title,Description: description, Content: content}
 	fmt.Println(p)
-	err := p.savePost()
+	err := p.saveCategory()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	http.Redirect(w, r, "/posts/"+id+"/"+title, http.StatusFound)
+	http.Redirect(w, r, "/categories/"+id+"/"+title, http.StatusFound)
 }
-func newPost(w http.ResponseWriter, r *http.Request) {
+
+func newCategory(w http.ResponseWriter, r *http.Request) {
 	title := r.FormValue("title")
 	description := r.FormValue("description")
-	//category_id := r.FormValue("category_id")
-	content := r.FormValue("content")
 
-	p := &Post{Title: title ,Description: description, Content: content}
+	p := &Category{Title: title ,Description: description}
 	fmt.Println(p)
-	err := p.addPost()
+	err := p.addCategory()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	http.Redirect(w, r, "/posts", http.StatusFound)
+	http.Redirect(w, r, "/categories", http.StatusFound)
 }
 
 func checkErr(err error) {
@@ -229,3 +230,4 @@ func checkErr(err error) {
 		panic(err)
 	}
 }
+

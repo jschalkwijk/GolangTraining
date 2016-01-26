@@ -1,0 +1,11 @@
+{{define "new-post"}}
+    {{template "header"}}
+    <h1>Create new post</h1>
+
+    <form action="/posts/add-post" method="POST">
+        <input type="text" name="title" placeholder=" Title"/>
+        <div><textarea name="content" rows="20" cols="80"></textarea></div>
+        <div><input type="submit" value="Save"></div>
+    </form>
+    {{template "footer"}}
+{{end}}

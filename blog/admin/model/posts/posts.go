@@ -164,10 +164,10 @@ func (p *Post) savePost() error {
 	db, err := sql.Open("mysql", "root:root@tcp(localhost:8889)/nerdcms_db?charset=utf8")
 	defer db.Close()
 	checkErr(err)
-	stmt, err := db.Prepare("UPDATE posts SET title=?, description=?, content=? WHERE post_id=?")
+	stmt, err := db.Prepare("UPDATE posts SET content=? WHERE post_id=?")
 	fmt.Println(stmt)
 	checkErr(err)
-	res, err := stmt.Exec(p.Title,p.Description,p.Content,p.Post_ID)
+	res, err := stmt.Exec(p.Content,p.Post_ID)
 	affect, err := res.RowsAffected()
 	checkErr(err)
 
@@ -179,10 +179,10 @@ func (p *Post) savePost() error {
 func (p *Post) addPost() error {
 	db, err := sql.Open("mysql", "root:root@tcp(localhost:8889)/nerdcms_db?charset=utf8")
 	defer db.Close()
-	stmt, err := db.Prepare("INSERT INTO posts (title,description,content) VALUES(?,?,?) ")
+	stmt, err := db.Prepare("INSERT INTO posts (title,content) VALUES(?,?) ")
 	fmt.Println(stmt)
 	checkErr(err)
-	res, err := stmt.Exec(p.Title,p.Description,p.Content)
+	res, err := stmt.Exec(p.Title,p.Content)
 	affect, err := res.RowsAffected()
 	fmt.Println(affect)
 	fmt.Println(res)
@@ -193,13 +193,10 @@ func (p *Post) addPost() error {
 
 
 func editPost(w http.ResponseWriter, r *http.Request,id string,title string) {
-	title = r.FormValue("title")
-	description := r.FormValue("description")
-	//category_id := r.FormValue("category_id")
 	content := r.FormValue("content")
 	new_id,error := strconv.Atoi(id)
 	checkErr(error)
-	p := &Post{Post_ID: new_id, Title: title,Description: description, Content: content}
+	p := &Post{Post_ID: new_id , Content: content}
 	fmt.Println(p)
 	err := p.savePost()
 	if err != nil {
@@ -210,11 +207,8 @@ func editPost(w http.ResponseWriter, r *http.Request,id string,title string) {
 }
 func newPost(w http.ResponseWriter, r *http.Request) {
 	title := r.FormValue("title")
-	description := r.FormValue("description")
-	//category_id := r.FormValue("category_id")
 	content := r.FormValue("content")
-
-	p := &Post{Title: title ,Description: description, Content: content}
+	p := &Post{Title: title , Content: content}
 	fmt.Println(p)
 	err := p.addPost()
 	if err != nil {
