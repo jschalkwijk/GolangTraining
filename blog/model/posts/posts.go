@@ -16,7 +16,7 @@ var view, _ = filepath.Abs("../jschalkwijk/GolangTraining/blog/view")
 var templates, _ = filepath.Abs("../jschalkwijk/GolangTraining/blog/templates")
 
 // Post struct to create posts which will be added to the collection struct
-type Post struct {
+type Data struct {
 	Post_ID int
 	Title string
 	Description string
@@ -42,7 +42,7 @@ var trashed int
 
 // Stores a single post, or multiple posts which we can then iterate over in the template
 type Collection struct {
-	Posts []Post
+	Posts []Data
 }
 
 /*
@@ -52,7 +52,7 @@ type Collection struct {
 */
 
 
-func renderTemplate(w http.ResponseWriter,name string, p []Post) {
+func renderTemplate(w http.ResponseWriter,name string, p []Data) {
 	t, err := template.ParseFiles(templates+"/"+"header.html",view + "/" + name + ".html",templates+"/"+"footer.html")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -107,11 +107,10 @@ func PostsHandler(w http.ResponseWriter, r *http.Request) {
 		p := getPosts()
 		renderTemplate(w,"posts", p)
 	}
-
 }
 
 // Get all Posts
-func getPosts() []Post {
+func getPosts() []Data {
 	db, err := sql.Open("mysql", "root:root@tcp(localhost:8889)/nerdcms_db?charset=utf8")
 	checkErr(err)
 	fmt.Println("Connection with database Established")
@@ -127,7 +126,7 @@ func getPosts() []Post {
 			&author,&date,&category_id,&trashed)
 		checkErr(err)
 
-		post := Post{post_id,title,description,content,keywords,approved,author,date,category_id,trashed}
+		post := Data{post_id,title,description,content,keywords,approved,author,date,category_id,trashed}
 
 		collection.Posts = append(collection.Posts , post)
 	}
@@ -136,7 +135,7 @@ func getPosts() []Post {
 }
 
 //Get a single Post
-func getSinglePost(id string,post_title string) []Post {
+func getSinglePost(id string,post_title string) []Data {
 	db, err := sql.Open("mysql", "root:root@tcp(localhost:8889)/nerdcms_db?charset=utf8")
 	checkErr(err)
 	fmt.Println("Connection established")
@@ -151,7 +150,7 @@ func getSinglePost(id string,post_title string) []Post {
 		&author,&date,&category_id,&trashed)
 	checkErr(err)
 
-	post := Post{post_id,title,description,content,keywords,approved,author,date,category_id,trashed}
+	post := Data{post_id,title,description,content,keywords,approved,author,date,category_id,trashed}
 
 	collection.Posts = append(collection.Posts , post)
 
@@ -160,7 +159,7 @@ func getSinglePost(id string,post_title string) []Post {
 }
 
 // Post Methods
-func (p *Post) savePost() error {
+func (p *Data) savePost() error {
 	db, err := sql.Open("mysql", "root:root@tcp(localhost:8889)/nerdcms_db?charset=utf8")
 	defer db.Close()
 	checkErr(err)
@@ -176,7 +175,7 @@ func (p *Post) savePost() error {
 	return err
 }
 
-func (p *Post) addPost() error {
+func (p *Data) addPost() error {
 	db, err := sql.Open("mysql", "root:root@tcp(localhost:8889)/nerdcms_db?charset=utf8")
 	defer db.Close()
 	stmt, err := db.Prepare("INSERT INTO posts (title,description,content) VALUES(?,?,?) ")
@@ -199,7 +198,7 @@ func editPost(w http.ResponseWriter, r *http.Request,id string,title string) {
 	content := r.FormValue("content")
 	new_id,error := strconv.Atoi(id)
 	checkErr(error)
-	p := &Post{Post_ID: new_id, Title: title,Description: description, Content: content}
+	p := &Data{Post_ID: new_id, Title: title,Description: description, Content: content}
 	fmt.Println(p)
 	err := p.savePost()
 	if err != nil {
@@ -214,7 +213,7 @@ func newPost(w http.ResponseWriter, r *http.Request) {
 	//category_id := r.FormValue("category_id")
 	content := r.FormValue("content")
 
-	p := &Post{Title: title ,Description: description, Content: content}
+	p := &Data{Title: title ,Description: description, Content: content}
 	fmt.Println(p)
 	err := p.addPost()
 	if err != nil {

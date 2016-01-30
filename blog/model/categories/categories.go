@@ -16,7 +16,7 @@ var view, _ = filepath.Abs("../jschalkwijk/GolangTraining/blog/view")
 var templates, _ = filepath.Abs("../jschalkwijk/GolangTraining/blog/templates")
 
 // categorie struct to create categories which will be added to the collection struct
-type Category struct {
+type Data struct {
 	Category_ID int
 	Title string
 	Description string
@@ -44,7 +44,7 @@ var trashed int
 
 // Stores a single categorie, or multiple categories which we can then iterate over in the template
 type Collection struct {
-	Categories []Category
+	Categories []Data
 }
 
 /*
@@ -54,7 +54,7 @@ type Collection struct {
 */
 
 
-func renderTemplate(w http.ResponseWriter,name string, p []Category) {
+func renderTemplate(w http.ResponseWriter,name string, p []Data) {
 	t, err := template.ParseFiles(templates+"/"+"header.html",view + "/" + name + ".html",templates+"/"+"footer.html")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -67,6 +67,7 @@ func renderTemplate(w http.ResponseWriter,name string, p []Category) {
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+	fmt.Println(view)
 }
 
 func splitURL(r *http.Request, prefix string) []string {
@@ -113,7 +114,7 @@ func CategoriesHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // Get all categories
-func getCategories() []Category {
+func getCategories() []Data {
 	db, err := sql.Open("mysql", "root:root@tcp(localhost:8889)/nerdcms_db?charset=utf8")
 	checkErr(err)
 	fmt.Println("Connection with database Established")
@@ -129,7 +130,7 @@ func getCategories() []Category {
 		&author,&cat_type,&date,&parent_id,&trashed)
 		checkErr(err)
 
-		category := Category{category_id,title,description,content,keywords,approved,author,cat_type,date,parent_id,trashed}
+		category := Data{category_id,title,description,content,keywords,approved,author,cat_type,date,parent_id,trashed}
 
 		collection.Categories = append(collection.Categories , category)
 	}
@@ -138,7 +139,7 @@ func getCategories() []Category {
 }
 
 //Get a single categorie
-func getSingleCategory(id string,category_title string) []Category {
+func getSingleCategory(id string,category_title string) []Data {
 	db, err := sql.Open("mysql", "root:root@tcp(localhost:8889)/nerdcms_db?charset=utf8")
 	checkErr(err)
 	fmt.Println("Connection established")
@@ -150,10 +151,10 @@ func getSingleCategory(id string,category_title string) []Category {
 	collection := new(Collection)
 
 	err = rows.Scan(&category_id, &title, &description, &content,&keywords,&approved,
-	&author,&date,&parent_id,&trashed)
+	&author,&cat_type,&date,&parent_id,&trashed)
 	checkErr(err)
 
-	category := Category{category_id,title,description,content,keywords,approved,author,cat_type,date,parent_id,trashed}
+	category := Data{category_id,title,description,content,keywords,approved,author,cat_type,date,parent_id,trashed}
 
 	collection.Categories = append(collection.Categories , category)
 
@@ -162,14 +163,14 @@ func getSingleCategory(id string,category_title string) []Category {
 }
 
 // categorie Methods
-func (p *Category) saveCategory() error {
+func (p *Data) saveCategory() error {
 	db, err := sql.Open("mysql", "root:root@tcp(localhost:8889)/nerdcms_db?charset=utf8")
 	defer db.Close()
 	checkErr(err)
-	stmt, err := db.Prepare("UPDATE categories SET title=?, description=?, content=? WHERE categorie_id=?")
+	stmt, err := db.Prepare("UPDATE categories SET title=?, description=? WHERE categorie_id=?")
 	fmt.Println(stmt)
 	checkErr(err)
-	res, err := stmt.Exec(p.Title,p.Description,p.Content,p.Category_ID)
+	res, err := stmt.Exec(p.Title,p.Description,p.Category_ID)
 	affect, err := res.RowsAffected()
 	checkErr(err)
 
@@ -178,7 +179,7 @@ func (p *Category) saveCategory() error {
 	return err
 }
 
-func (p *Category) addCategory() error {
+func (p *Data) addCategory() error {
 	db, err := sql.Open("mysql", "root:root@tcp(localhost:8889)/nerdcms_db?charset=utf8")
 	defer db.Close()
 	stmt, err := db.Prepare("INSERT INTO categories (title,description) VALUES(?,?) ")
@@ -197,11 +198,10 @@ func (p *Category) addCategory() error {
 func editCategory(w http.ResponseWriter, r *http.Request,id string,title string) {
 	title = r.FormValue("title")
 	description := r.FormValue("description")
-	//category_id := r.FormValue("category_id")
-	content := r.FormValue("content")
-	new_id,error := strconv.Atoi(id)
+	id_string := r.FormValue("category_id")
+	category_id,error := strconv.Atoi(id_string)
 	checkErr(error)
-	p := &Category{Category_ID: new_id, Title: title,Description: description, Content: content}
+	p := &Data{Category_ID: category_id, Title: title,Description: description}
 	fmt.Println(p)
 	err := p.saveCategory()
 	if err != nil {
@@ -215,7 +215,7 @@ func newCategory(w http.ResponseWriter, r *http.Request) {
 	title := r.FormValue("title")
 	description := r.FormValue("description")
 
-	p := &Category{Title: title ,Description: description}
+	p := &Data{Title: title ,Description: description}
 	fmt.Println(p)
 	err := p.addCategory()
 	if err != nil {
