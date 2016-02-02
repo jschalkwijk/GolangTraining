@@ -10,38 +10,25 @@ import (
 var view, _ = filepath.Abs("../jschalkwijk/GolangTraining/blog/view")
 var templates, _ = filepath.Abs("../jschalkwijk/GolangTraining/blog/templates")
 
-type Data struct {
-	Post_ID int
-	Title string
-	Description string
-	Content string
-	Keywords string
-	Approved int
-	Author string
-	Date string
-	Category_ID int
-	Trashed int
-}
-
 type Collection struct {
-	Posts []Data
+
 }
 
 func DashboardHandler(w http.ResponseWriter, r *http.Request){
 		//params := splitURL(r,"")
 		collection := new(Collection)
-		p := collection.Posts
+		p := collection
 		renderTemplate(w,"index", p)
 }
 
-func renderTemplate(w http.ResponseWriter,name string, p []Data) {
+func renderTemplate(w http.ResponseWriter,name string, data *Collection) {
 	t, err := template.ParseFiles(templates+"/"+"header.html",view + "/" + name + ".html",templates+"/"+"footer.html")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	t.ExecuteTemplate(w,"header",nil)
-	t.ExecuteTemplate(w,name,p)
+	t.ExecuteTemplate(w,name,data)
 	t.ExecuteTemplate(w,"footer",nil)
 	err = t.Execute(w, nil)
 	if err != nil {
