@@ -1,4 +1,4 @@
-package post
+package posts
 
 import (
 	"net/http"
@@ -8,22 +8,9 @@ import (
 )
 
 
-func Posts(w http.ResponseWriter, r *http.Request) {
-
- if(len(params) == 3 && params[0] == "edit"){
-		p := posts.GetSinglePost(params[1],params[2])
-		controller.RenderTemplate(w,"edit-post", p)
-	} else if(len(params) == 3 && params[0] == "save"){
-		posts.EditPost(w,r,params[1],params[2])
-	} else if(len(params) == 1 && params[0] == "new"){
-
-	} else if(len(params) == 1 && params[0] == "add-post"){
-		posts.NewPost(w, r)
-	} else {
-		// returns the page struct with the assigned values from the url and file contents
-		p := posts.GetPosts()
-	 	controller.RenderTemplate(w,"posts", p)
-	}
+func Index(w http.ResponseWriter, r *http.Request) {
+	p := posts.GetPosts()
+	controller.RenderTemplate(w,"posts", p)
 }
 
 func Single(w http.ResponseWriter, r *http.Request){
@@ -39,3 +26,23 @@ func New(w http.ResponseWriter, r *http.Request){
 	p := collection
 	controller.RenderTemplate(w,"new-post", p)
 }
+
+func Edit(w http.ResponseWriter, r *http.Request){
+	vars := mux.Vars(r)
+	id := vars["id"]
+	post_title := vars["title"]
+	p := posts.GetSinglePost(id,post_title)
+	controller.RenderTemplate(w,"edit-post", p)
+}
+func Save(w http.ResponseWriter, r *http.Request){
+	vars := mux.Vars(r)
+	id := vars["id"]
+	post_title := vars["title"]
+	posts.EditPost(w,r,id,post_title)
+}
+
+func Add(w http.ResponseWriter, r *http.Request){
+	posts.NewPost(w, r)
+}
+
+

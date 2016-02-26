@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"strconv"
+
 )
 
 // here we define the absolute path to the view folder it takes the go root until the github folder.

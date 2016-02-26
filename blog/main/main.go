@@ -2,18 +2,36 @@ package main
 
 import (
 	"net/http"
-	//"github.com/jschalkwijk/GolangTraining/blog/model/posts"
-	//"github.com/jschalkwijk/GolangTraining/blog/model/categories"
+	"github.com/gorilla/mux"
 	"github.com/jschalkwijk/GolangTraining/blog/model/home"
-	"github.com/jschalkwijk/GolangTraining/blog/controller"
+	"github.com/jschalkwijk/GolangTraining/blog/controller/posts"
+	"github.com/jschalkwijk/GolangTraining/blog/controller/categories"
 )
 
-var url string
 func main() {
-//	http.HandleFunc("/",controller.Ctrl)
-	http.HandleFunc("/", home.DashboardHandler)
-	http.HandleFunc("/posts/", controller.Posts)
-	http.HandleFunc("/categories/", controller.Categories)
-	//http.Handle("/static/css", http.StripPrefix("/static/css/", http.FileServer(http.Dir("static/css"))))
+	r := mux.NewRouter()
+
+	// Index
+	r.HandleFunc("/", home.DashboardHandler)
+	// Posts
+	r.HandleFunc("/posts/", posts.Index)
+		p := r.PathPrefix("/posts").Subrouter()
+		p.HandleFunc("/{id:[0-9]+}/{title}", posts.Single)
+		p.HandleFunc("/new", posts.New)
+		p.HandleFunc("/edit/{id:[0-9]+}/{title}", posts.Edit)
+		p.HandleFunc("/save/{id:[0-9]+}/{title}", posts.Save)
+		p.HandleFunc("/add-post", posts.Add)
+	// Categories
+	r.HandleFunc("/categories/", categories.Index)
+		c := r.PathPrefix("/categories").Subrouter()
+		c.HandleFunc("/{id:[0-9]+}/{title}", categories.Single)
+		c.HandleFunc("/new", categories.New)
+		c.HandleFunc("/edit/{id:[0-9]+}/{title}", categories.Edit)
+		c.HandleFunc("/save/{id:[0-9]+}/{title}", categories.Save)
+		c.HandleFunc("/add-category", categories.Add)
+
+	http.Handle("/", r)
+
 	http.ListenAndServe(":8080", nil)
+
 }
